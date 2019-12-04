@@ -49,10 +49,10 @@ If you want a single-step login instead of a separate POST call (as explained ab
 
 | Method | forward parameter | JWT token | Example |
 | ------ | -------- | ----- | ----- |
-| GET    | "forward" querystring | "jwt" querystring | Link |
-| GET    | "forward" querystring | Authentication header (Bearer XXXXXX)| Link |
-| POST   | "forward" querystring | "jwt" field in request body | Link |
-| POST   | "forward" field in request body | "jwt" field in request body | Link |
+| GET    | "forward" querystring | "jwt" querystring | <a href="html-examples.md">Example 1</a> |
+| GET    | "forward" querystring | Authentication header (Bearer XXXXXX)|  |
+| POST   | "forward" querystring | "jwt" field in request body | <a href="html-examples.md">Example 2</a> |
+| POST   | "forward" field in request body | "jwt" field in request body | <a href="html-examples.md">Example 3</a> |
 
 The forward url must match with the environment variable FORWARD_URLS (a RegEx match is done), to allow only redirects to intended targets. 
 
