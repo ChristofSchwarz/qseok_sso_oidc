@@ -38,9 +38,12 @@ openssl rsa -in ./private.key -pubout -out ./public.key
 
 If you want a single-step login instead of a separate POST call (as explained above) you can set the environment variable SIGNIN_ENDPOINT_ENABLED=true and you will get an additional endpoint with 3 possibilities to authenticate yourself:
 
- * a GET call with 2 query parameters "forward" and "jwt" e.g. /signin?forward=http://qliksense.com/&jwt=XXXXXX (this is not recommended as the token is exposed and tracked by logs)
- * a GET call with 1 query parameter "forward" and a http Authentication header (Bearer XXXXXX)
- * a POST call (form submit) with the "forward" and "jwt" in the send-body (like a html form submit)
+| Method | forward parameter | JWT token | Example |
+| ------ | -------- | ----- | ----- |
+| GET    | "forward" querystring | "jwt" querystring | Link |
+| GET    | "forward" querystring | Authentication header (Bearer XXXXXX)| Link |
+| POST   | "forward" querystring | "jwt" field in request body | Link |
+| POST   | "forward" field in request body | "jwt" field in request body | Link |
 
 The forward url must match with the environment variable FORWARD_URLS (a RegEx match is done), to allow only redirects to intended targets. 
 
