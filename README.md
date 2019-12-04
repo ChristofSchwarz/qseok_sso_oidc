@@ -16,7 +16,7 @@ If the signature of the JWT was wrong you will get a JSON error, for example
 
 ## JWT Token
 
-The security is checked with a signed jwt key, only when valid, payload (user claim) in the jwt token is trusted. You can find many code snippets in different programming languages on www.jwt.io and you can even create a token there. 
+The security is checked with a signed jwt key, and only when it's valid the payload (user claim) in the jwt token is trusted. You can find many code snippets in different programming languages on www.jwt.io and you can even create a token online for testing. 
 
 The payload of the token is what is going to be injected to qliksense at the end of the single-signon process. Here is an example of the structure
 https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imp1YiIsIm5hbWUiOiJKdWxpYSBCYXVtZ2FydG5lciIsImdyb3VwcyI6WyJFdmVyeW9uZSIsIlByZXNhbGVzIl0sImlhdCI6MTY3MzgwNTc4Mn0.Pc1yWkStxMEt3_7EtmhEx0oWGA8FN_sOjjdECTRz3HA
