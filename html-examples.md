@@ -6,12 +6,12 @@ In the below examples, the url of the passthrough-oidc and qliksense are separat
  
 Note that if you deployed it with our helm package, you will have the same hostname for both, just different paths
  
-## GET with both, forward and jwt as querystrings
+## 1) GET request with forward and jwt as querystrings
 ```
 <a href="http://qse-csw.westeurope.cloudapp.azure.com:3000/sso/signin?forward=https://elastic.example&jwt=eyJhbG......">Login</a>
 ```
 
-## POST with forward querystring and jwt as form field
+## 2) POST request with forward querystring and jwt as form field
 ```
 <form method="POST" action="http://qse-csw.westeurope.cloudapp.azure.com:3000/sso/signin?forward=https://elastic.example">
   <input hidden name="jwt" value="eyJhb......" />
@@ -19,7 +19,7 @@ Note that if you deployed it with our helm package, you will have the same hostn
 </form>
 ```
 
-## POST with both, querystring and jwt as form fields
+## 3) POST with querystring and jwt as form fields
 ```
 <form method="POST" action="http://qse-csw.westeurope.cloudapp.azure.com:3000/sso/signin">
   <input hidden name="forward" value="https://elastic.example" />
