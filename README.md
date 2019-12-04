@@ -67,12 +67,12 @@ The token can be
 | FORWARD_URLS | Regex pattern to match allowed forward urls to a qseok target resource (only relevant for /signin endpoint) | ^http://\|^https:// |
 
 
-## Those files were edited:
- * app.js (main app, new endpoints /signin and /env)
- * views\login.ejs (Login Form)
- * views\interactions.ejs
- * node_modules\oidc-provider\lib\helpers\defaults.js  (Logout Form)
- * <a href="node_modules/oidc-provider/lib/actions/authorization/check_scope.js">node_modules\oidc-provider\lib\actions\authorization\check_scope.js</a> (hint which auth session is opened for which target url at qliksense)
- * server\config.js (allowed return_uri)
- * server\interactions.js (manipulated /interaction endpoint)
- * server\accountStore.js (pretending lookup of a user)
+## Those files are key to maintain:
+
+| File | Meaning |
+| ---- | ------- |
+| app.js | main app, endpoints /signin, /ticket, /env, /misc found here |
+| helpers/config.js | all configuration for the oidc client, especially the FindAccount function is key |
+| interactions.js | routing for /interaction urls, it shortcuts the getGrant by directly logging the user in |
+| claimStore.js | methods to manage a temp array of user-claims (jwt payloads), which are stored under different keys (qlikticket number, session id, interaction id, userid) |
+
