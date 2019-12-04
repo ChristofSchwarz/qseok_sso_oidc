@@ -18,17 +18,26 @@ If the signature of the JWT was wrong you will get a JSON error, for example
 
 The security is checked with a signed jwt key, and only when it's valid the payload (user claim) in the jwt token is trusted. You can find many code snippets in different programming languages on www.jwt.io and you can even create a token online for testing. 
 
-The payload of the token is what is going to be injected to qliksense at the end of the single-signon process. Here is an example of the structure
-https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imp1YiIsIm5hbWUiOiJKdWxpYSBCYXVtZ2FydG5lciIsImdyb3VwcyI6WyJFdmVyeW9uZSIsIlByZXNhbGVzIl0sImlhdCI6MTY3MzgwNTc4Mn0.Pc1yWkStxMEt3_7EtmhEx0oWGA8FN_sOjjdECTRz3HA
-
-The token can be one of the two, the key-pair method (RS256) is the preferred and **more secure**:
+The payload of the token is what is going to be injected to qliksense at the end of the single-signon process. Here is an example of the structure:
+```
+{
+  "id": "jub",
+  "name": "Julia Baumgartner",
+  "groups": [
+    "Everyone",
+    "Presales"
+  ],
+  "iat": 1673805782
+}
+```
+The token can be signed in one of the below ways:
 
 | Method | Sign the token | Check the token (passthrough-oidc) |
 | ------ | -------------- | ---------------------------------- |
 | RS256  | sign with private key | provide the public key in the environment variable JWT_DECRYPT_PUBLICKEY |
 | HS256  | sign with a passphrase | provide the same passphrase in the environment variable JWT_DECRYPT_PUBLICKEY |
 
-If you want to generate a new key pair, here are the Linux commands:
+The key-pair method (RS256) is the preferred and **more secure** way. If you want to generate a new key pair, here are the Linux commands:
 ```
 openssl genrsa -out ./private.key 1024
 openssl rsa -in ./private.key -pubout -out ./public.key
