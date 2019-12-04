@@ -1,25 +1,55 @@
 # OIDC provider for QSEoK with SSO
 by Jacob Vinzent and Christof Schwarz
 
-This is a oidc provider based on this project (https://github.com/panva/node-oidc-provider) with changed settings. 
-It does not prompt for userid and password, instead an additional endpoint **/signin** was added
-which parses a provided JWT token (passed as querystring or Bearer token in http header) and remembers this user up to 60 seconds to return to the standard oidc endpoints (/auth, /token, /interaction) during the Qlik Sense login process.
+This is a oidc provider based on this project (https://github.com/panva/node-oidc-provider) with a new behaviour. It does not prompt for userid and password, it looks up the user from a ticketnumber which was acquired before initiating the login process at qliksense.
 
-To run a single-signon, call this endpoint (qseok-server-url is your target address of your Sense Server) with the following parameters:
-
- * the bearer token can be part of the http-header (Authorziation: Bearer <jwt>) or provided as querystring (jwt=<jwt>) 
-   which isn't recommendend
- * forward: url of the qliksense installation (a deeplink is possible for example to a specific app)
- 
+The trick is to make a **POST** call to the endpoint **/ticket** with a valid JWT token in the Authentication header (Bearer XXXXXX). The result is a JSON with the Ticket in this format, if the JWT was valid and the signature could be verified:
 ```
-Syntax:
-http://<nodeapp-url-port-path>/signin?jwt=<jwt-token>&forward=https%3A%2F%2F<qseok-server-url>
+{"Ticket":"d7114b56-87ec-4b2e-8205-78a272b5db49"}
 ```
-Example: http://qse-csw.westeurope.cloudapp.azure.com:3000/sso/signin?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imp1YiIsIm5hbWUiOiJKdWxpYSBCYXVtZ2FydG5lciIsImdyb3VwcyI6WyJFdmVyeW9uZSIsIlByZXNhbGVzIl0sImlhdCI6MTY3MzgwNTc4Mn0.Pc1yWkStxMEt3_7EtmhEx0oWGA8FN_sOjjdECTRz3HA&forward=https://elastic.example
+At the same time, the Passthrough-OIDC provider has learned and stored for 60 seconds the user payload of the JWT token. It is ready to present it to the "holder" of the same ticket number. That means, you can now go to any url of your Qlik Sense on Kubernetes server and add "?qlikticket=d7114b56-87ec-4b2e-8205-78a272b5db49" to the url. If the config was correct on both sides, qliksense and the passthrough-oidc, that is all it takes to log in.
 
-![alttext](https://github.com/ChristofSchwarz/pics/raw/master/passthruoidc.gif "screenshot")
+If the signature of the JWT was wrong you will get a JSON error, for example
+```
+{"error":"Error creating ticket for jwt token","name":"JsonWebTokenError","message":"invalid token"}
+```
 
-## Configuration on QSEoK side:
+## JWT Token
+
+The security is checked with a signed jwt key, only when valid, payload (user claim) in the jwt token is trusted. You can find many code snippets in different programming languages on www.jwt.io and you can even create a token there. 
+
+The payload of the token is what is going to be injected to qliksense at the end of the single-signon process. Here is an example of the structure
+https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imp1YiIsIm5hbWUiOiJKdWxpYSBCYXVtZ2FydG5lciIsImdyb3VwcyI6WyJFdmVyeW9uZSIsIlByZXNhbGVzIl0sImlhdCI6MTY3MzgwNTc4Mn0.Pc1yWkStxMEt3_7EtmhEx0oWGA8FN_sOjjdECTRz3HA
+
+The token can be one of the two, the key-pair method (RS256) is the preferred and **more secure**:
+
+| Method | Sign the token | Check the token (passthrough-oidc) |
+| ------ | -------------- | ---------------------------------- |
+| RS256  | sign with private key | provide the public key in the environment variable JWT_DECRYPT_PUBLICKEY |
+| HS256  | sign with a passphrase | provide the same passphrase in the environment variable JWT_DECRYPT_PUBLICKEY |
+
+If you want to generate a new key pair, here are the Linux commands:
+```
+openssl genrsa -out ./private.key 1024
+openssl rsa -in ./private.key -pubout -out ./public.key
+``` 
+
+### Optional endpoint /signin
+
+If you want a single-step login instead of a separate POST call (as explained above) you can set the environment variable SIGNIN_ENDPOINT_ENABLED=true and you will get an additional endpoint with 3 possibilities to authenticate yourself:
+
+ * a GET call with 2 query parameters "forward" and "jwt" e.g. /signin?forward=http://qliksense.com/&jwt=XXXXXX (this is not recommended as the token is exposed and tracked by logs)
+ * a GET call with 1 query parameter "forward" and a http Authentication header (Bearer XXXXXX)
+ * a POST call (form submit) with the "forward" and "jwt" in the send-body (like a html form submit)
+
+The forward url must match with the environment variable FORWARD_URLS (a RegEx match is done), to allow only redirects to intended targets. 
+
+Note, that the /signin is also working with a qlikticket (like with the POST request on /ticket endpoint) so whatever your forward url to qliksense is, it will add the querystring qlikticket=XXXXXX to the url. 
+
+### Configuration on QSEoK side:
+
+The recommended configuration for the passthrough-oidc is to deploy it via helm (here is a separate Git repo https://github.com/ChristofSchwarz/qseok_oidc_helm) which will run it as a sub route of the same qliksense url (ingress), but it can also be installed completely separate from qliksense. 
+
 edit the relevant qliksense.yaml like this, you may correct the following parts
  * hostname: replace elastic.example with the correct address of your sense server
  * discoveryUrl: replace 192.168.204.1 with the correct address of this node app
@@ -41,13 +71,8 @@ identity-providers:
 ```
 use helm upgrade and restart (delete) the identity-providers pod. Delete all cookies in the browser before you retry.
 
-## JWT Token
-The token can be 
- * HS256 with a passphrase (the same to be configured as environment variable JWT_DECRYPT_PUBLICKEY when running this app), example: https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imp1YiIsIm5hbWUiOiJKdWxpYSBCYXVtZ2FydG5lciIsImdyb3VwcyI6WyJFdmVyeW9uZSIsIlByZXNhbGVzIl0sImlhdCI6MTY3MzgwNTc4Mn0.Pc1yWkStxMEt3_7EtmhEx0oWGA8FN_sOjjdECTRz3HA
- * RS256 signed with a private key
- 
 
-## Environment variables 
+### Environment variables 
 
 | Variable | Usage | Default |
 | -------- | ----- | ------- |
