@@ -60,7 +60,7 @@ Note, that the /signin is also working with a qlikticket (like with the POST req
 
 ## Configuration on QSEoK side:
 
-The recommended configuration for the passthrough-oidc is to deploy it via helm (here is a separate Git repo https://github.com/ChristofSchwarz/qseok_oidc_helm) which will run it as a sub route of the same qliksense url (ingress), but it can also be installed completely separate from qliksense. 
+The recommended configuration for the passthrough-oidc is to deploy it via **helm** (here is a separate Git repo https://github.com/ChristofSchwarz/qseok_oidc_helm) which will run it as a route of the same qliksense url (ingress), but it can also be installed completely separate from qliksense. 
 
 edit the relevant qliksense.yaml like this, you may correct the following parts
  * hostname: replace elastic.example with the correct address of your sense server
@@ -84,9 +84,11 @@ identity-providers:
 use helm upgrade and restart (delete) the identity-providers pod. Delete all cookies in the browser before you retry.
 
 
-### Environment variables 
+## Environment variables 
 
-The possible environment variables are explained in the first rows of <a href="app.js">app.js</a>
+The possible environment variables (PORT, PATH_PREFIX, CLIENT_ID, CLIENT_SECRET, JWT_DECRYPT_PUBLICKEY, ...) are explained in the first rows of <a href="app.js">app.js</a>. 
+
+Note that if you use the **helm** chart to deploy it, all the settings will be done in the <a href="https://github.com/ChristofSchwarz/qseok_oidc_helm/blob/master/values.yaml">values.yaml of that chart</a>. The settings in yaml are made in lower case letters. 
 
 
 ## Those files are key to maintain:
