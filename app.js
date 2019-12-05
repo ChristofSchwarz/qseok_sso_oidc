@@ -1,3 +1,5 @@
+const appVersion = '1.01';
+
 //////////////// environment variables ////////////////
 
 // set the defaults centrally here if not present in OS or .env file
@@ -61,6 +63,7 @@ const jsonwebtoken = require('jsonwebtoken');
 const claimStore = require ('./claimStore.js');
 const issuer = 'http://simple-oidc-provider';  // Qlik only accepts this issuer
 const emptyhtml = require('./emptyhtml');
+var staticHTML = emptyhtml.page();
 
 process.claimStore = {};  // initialization of global variable
 
@@ -114,7 +117,8 @@ let server;
 
 //////////////// hello world endpoint ////////////////
   app.get(process.env.PATH_PREFIX, function(req,res){
-    res.status(200).send('Hello world. This is the Qlik Presales Single-Signon Passthru-OIDC.');
+    res.status(200).send('Hello world. This is the Qlik Presales Single-Signon Passthru-OIDC.\n' 
+    + `Version: ${appVersion}\n`);
   })
 
 //////////////// ticket endpoint ////////////////  
