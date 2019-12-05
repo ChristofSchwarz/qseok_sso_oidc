@@ -1,4 +1,4 @@
-const appVersion = '1.03';
+const appVersion = '1.04';
 
 //////////////// environment variables ////////////////
 
@@ -64,7 +64,7 @@ const claimStore = require ('./claimStore.js');
 const issuer = 'http://simple-oidc-provider';  // Qlik only accepts this issuer
 const emptyhtml = require('./emptyhtml');
 var staticHTML = emptyhtml.page();
-Provider.proxy = true;
+
 process.claimStore = {};  // initialization of global variable
 
 let server;
@@ -73,9 +73,10 @@ let server;
 
   // const provider = new Provider(ISSUER, { adapter, ...configuration });
   const provider = new Provider(issuer, configuration);
+  provider.proxy = true; // also work behind reverse proxy (TLS offloading)
 
 //////////////// oidc listener ////////////////
-
+  
   provider.use(async (ctx, next) => {
     // pre-processing - This is a listener on all incoming events
     console.log('>>> incoming request: ', ctx.method, ctx.path);
