@@ -54,10 +54,10 @@ const DEFAULTS = {
 
   clients: [
     {
-      client_id: process.env.CLIENT_ID || 'foo',
-      client_secret: process.env.CLIENT_SECRET || 'thanksjviandcsw',
-      redirect_uris: (process.env.OIDC_REDIRECTS && process.env.OIDC_REDIRECTS.split(',')) || ['https://elastic.example/login/callback'],
-      post_logout_redirect_uris: (process.env.POST_LOGOUT_REDIRECTS && process.env.POST_LOGOUT_REDIRECTS.split(',')) || ['https://elastic.example','https://www.qlik.com'],
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+      redirect_uris: process.env.OIDC_REDIRECTS.split(','),
+      post_logout_redirect_uris: process.env.POST_LOGOUT_REDIRECTS.split(','),
       //grant_types: ['refresh_token', 'authorization_code']
     }
   ],

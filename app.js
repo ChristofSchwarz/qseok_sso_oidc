@@ -2,6 +2,8 @@
 
 // set the defaults centrally here if not present in OS or .env file
 require('dotenv').config();
+
+// OIDC Settings
 process.env.PORT = process.env.PORT                   
   || 3000  // http port where the service is exposed
 process.env.PATH_PREFIX = process.env.PATH_PREFIX     
@@ -13,20 +15,20 @@ process.env.CLIENT_SECRET = process.env.CLIENT_SECRET
 process.env.JWT_DECRYPT_PUBLICKEY = process.env.JWT_DECRYPT_PUBLICKEY 
   || 'shhhh'  // passphrase or public certificate
 process.env.OIDC_REDIRECTS = process.env.OIDC_REDIRECTS
-  || 'https://elastic.example/login/callback'
+  || 'https://elastic.example/login/callback'  // comma-separated list of allowed callbacks to qliksense
 process.env.POST_LOGOUT_REDIRECTS = process.env.POST_LOGOUT_REDIRECTS 
-  || 'https://www.qlik.com,http://localhost:5656/tryme.html';
+  || 'https://www.qlik.com'  // allowed urls to go to after logout
+
+
+// Convenience settings of /signin endpoint
 process.env.SIGNIN_ENDPOINT_ENABLED = process.env.SIGNIN_ENDPOINT_ENABLED 
   || 'true'  // set to true if you like the /signin endpoint, otherwise it is missing
 process.env.FORWARD_URLS = process.env.FORWARD_URLS   
   || '^http://|^https://'  // a regex to validate "forward" urls on /signin endpoint
-
-
 process.env.MSG_LOGIN = process.env.MSG_LOGIN 
   || 'Logging in...'  // title shown shortly when token was ok on /signin endpoint
 process.env.MSG_TOKEN_ACCEPTED = process.env.MSG_TOKEN_ACCEPTED 
   || 'Token accepted.' // text shown shortly when token was ok on /signin endpoint
-
 process.env.ERROR_TITLE = process.env.ERROR_TITLE     
   || 'Ooops! Something went wrong'; // generic error title
 process.env.ERROR_MSG_NO_CLAIM  = process.env.ERROR_MSG_NO_CLAIM 
@@ -58,7 +60,7 @@ const interactions = require('./interactions');
 const jsonwebtoken = require('jsonwebtoken');
 const claimStore = require ('./claimStore.js');
 const issuer = 'http://simple-oidc-provider';  // Qlik only accepts this issuer
-const staticHTML = require('./emptyhtml').page();
+const emptyhtml = require('./emptyhtml');
 
 process.claimStore = {};  // initialization of global variable
 
@@ -214,8 +216,8 @@ let server;
   app.use(process.env.PATH_PREFIX, provider.callback);
   
 
-  server = app.listen(PORT, () => {
-    console.log(`application listening on port ${PORT}, check its ${process.env.PATH_PREFIX}/.well-known/openid-configuration`);
+  server = app.listen(process.env.PORT, () => {
+    console.log(`application listening on port ${process.env.PORT}, check its ${process.env.PATH_PREFIX}/.well-known/openid-configuration`);
   });
 
 })().catch((err) => {
