@@ -43,7 +43,7 @@ openssl genrsa -out ./private.key 1024
 openssl rsa -in ./private.key -pubout -out ./public.key
 ``` 
 
-### Optional endpoint /signin
+## Optional endpoint /signin
 
 If you want a single-step login instead of a separate POST call (as explained above) you can set the environment variable SIGNIN_ENDPOINT_ENABLED=true and you will get an additional endpoint with 3 possibilities to authenticate yourself:
 
@@ -58,7 +58,7 @@ The forward url must match with the environment variable FORWARD_URLS (a RegEx m
 
 Note, that the /signin is also working with a qlikticket (like with the POST request on /ticket endpoint) so whatever your forward url to qliksense is, it will add the querystring qlikticket=XXXXXX to the url. 
 
-### Configuration on QSEoK side:
+## Configuration on QSEoK side:
 
 The recommended configuration for the passthrough-oidc is to deploy it via helm (here is a separate Git repo https://github.com/ChristofSchwarz/qseok_oidc_helm) which will run it as a sub route of the same qliksense url (ingress), but it can also be installed completely separate from qliksense. 
 
@@ -72,8 +72,8 @@ identity-providers:
     idpConfigs:
       - hostname: "elastic.example" 
         discoveryUrl: "http://qse-csw.westeurope.cloudapp.azure.com:3000/sso/.well-known/openid-configuration"
-        clientId: "foo"  # has to match env var CLIENT_ID 
-        clientSecret: "bar"  # has to match env var CLIENT_SECRET
+        clientId: "singlesignon"  # has to match env var CLIENT_ID 
+        clientSecret: "thanksjviandcsw"  # has to match env var CLIENT_SECRET
         realm: "sso"
         postLogoutRedirectUri: "https://elastic.example"  # must be in env var POST_LOGOUT_REDIRECTS
         claimsMapping:
