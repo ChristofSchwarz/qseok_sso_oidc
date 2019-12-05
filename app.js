@@ -51,16 +51,16 @@ process.env.ERROR_DEDIR_AFTER_SECONDS = process.env.ERROR_DEDIR_AFTER_SECONDS
 
 const Provider = require('oidc-provider').Provider;
 const express = require('express');
+var app = express();
 const configuration = require('./helpers/config');
 const routes = require('./routes/express');
 const interactions = require('./interactions');
 const jsonwebtoken = require('jsonwebtoken');
-
-var app = express();
-process.claimStore = {};  // initialization of global variable
 const claimStore = require ('./claimStore.js');
 const issuer = 'http://simple-oidc-provider';  // Qlik only accepts this issuer
 const staticHTML = require('./emptyhtml').page();
+
+process.claimStore = {};  // initialization of global variable
 
 let server;
 (async () => {
