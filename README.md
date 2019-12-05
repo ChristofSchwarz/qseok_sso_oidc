@@ -86,7 +86,7 @@ use helm upgrade and restart (delete) the identity-providers pod. Delete all coo
 
 ## Environment variables 
 
-The possible environment variables (PORT, PATH_PREFIX, CLIENT_ID, CLIENT_SECRET, JWT_DECRYPT_PUBLICKEY, ...) are explained in the first rows of <a href="app.js">app.js</a>. 
+The possible environment variables (PATH_PREFIX, CLIENT_ID, CLIENT_SECRET, JWT_DECRYPT_PUBLICKEY, ...) are explained in the first rows of <a href="app.js">app.js</a>. 
 
 Note that if you use the **helm** chart to deploy it, all the settings will be done in the <a href="https://github.com/ChristofSchwarz/qseok_oidc_helm/blob/master/values.yaml">values.yaml of that chart</a>. The settings in yaml are made in lower case letters. 
 
