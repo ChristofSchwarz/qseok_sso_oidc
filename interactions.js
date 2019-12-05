@@ -1,7 +1,7 @@
 const express = require('express')
 const claimStore = require('./claimStore');
-const staticHTML = require('./emptyhtml').page();
-
+//const staticHTML = require('./emptyhtml').page();
+const emptyhtml = require('./emptyhtml');
 module.exports = (oidc, prefix) => {
 
   async function getGrant (req, res) {
@@ -30,10 +30,8 @@ module.exports = (oidc, prefix) => {
         consent: {}  
       })
     } else {
-      res.status(401)
-        .send(staticHTML.replace('<!--bodyinsert-->', `
-          <h1 class="errheader">oops! something went wrong</h1>
-          <p class="errmsg">No user claim found or key expired.</p>`));
+      res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_NO_CLAIM
+        ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS));
     }
   }
 

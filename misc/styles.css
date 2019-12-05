@@ -5,8 +5,16 @@ body {
   margin-bottom: 50px;
 }
 
-.tokenaccepted, .redirmsg {
+.goodheader {
   font-weight: bold;
+}
+
+.goodmsg {
+  font-weight: normal;
+}
+ 
+.errheader {
+  font-weight: normal;
 }
 
 .errmsg {
