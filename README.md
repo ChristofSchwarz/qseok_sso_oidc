@@ -60,28 +60,30 @@ Note, that the /signin is also working with a qlikticket (like with the POST req
 
 ## Configuration on QSEoK side:
 
-The recommended configuration for the passthrough-oidc is to deploy it via **helm** (here is a separate Git repo https://github.com/ChristofSchwarz/qseok_oidc_helm) which will run it as a route of the same qliksense url (ingress), but it can also be installed completely separate from qliksense. 
+You can decide to 
+ * deploy the passtrhough-oidc as a **helm package** (recommended) so it runs within the same url of qlik sense (ingress) -> see this <a href="https://github.com/ChristofSchwarz/qseok_oidc_helm">Git repo</a>
+ * install the passthrough-oidc as a separate service (.yaml example below assumes this)
 
-edit the relevant qliksense.yaml like this, you may correct the following parts
+Edit the relevant qliksense.yaml of your Qlik Sense installation like this. Correct the following parts
  * hostname: replace elastic.example with the correct address of your sense server
- * discoveryUrl: replace 192.168.204.1 with the correct address of this node app
+ * discoveryUrl: replace http://qse-csw.westeurope.cloudapp.azure.com:3000 with the correct address of this app
  * postLogoutRedirectUri
 ```
 identity-providers:
   secrets:
     idpConfigs:
       - hostname: "elastic.example" 
-        discoveryUrl: "http://qse-csw.westeurope.cloudapp.azure.com:3000/sso/.well-known/openid-configuration"
+        discoveryUrl: "http://qse-csw.westeurope.cloudapp.azure.com:3000/singlesignon/.well-known/openid-configuration"
         clientId: "singlesignon"  # has to match env var CLIENT_ID 
         clientSecret: "thanksjviandcsw"  # has to match env var CLIENT_SECRET
         realm: "sso"
-        postLogoutRedirectUri: "https://elastic.example"  # must be in env var POST_LOGOUT_REDIRECTS
+        postLogoutRedirectUri: "https://www.qlik.com"  # must also be in env var POST_LOGOUT_REDIRECTS
         claimsMapping:
           sub: ["sub", "id"]
           name: ["name"]
           groups: ["groups"]
 ```
-use helm upgrade and restart (delete) the identity-providers pod. Delete all cookies in the browser before you retry.
+use **helm upgrade** and restart (delete) the identity-providers pod. Delete all cookies in the browser before you retry.
 
 
 ## Environment variables 
