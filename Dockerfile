@@ -1,7 +1,7 @@
 #########################
 # Base Image
 #########################
-FROM node:8-alpine AS base
+FROM node:latest AS base
 
 WORKDIR /usr/src/app
 COPY . /usr/src/app
@@ -17,7 +17,6 @@ RUN cd /usr/src/app
 RUN npm install javascript-obfuscator -g
 RUN mkdir -p ./src-maps
 RUN mkdir -p ./src-maps/node_modules/@qlik
-RUN apk add ncurses
 RUN javascript-obfuscator app.js  --output ./app.js --dead-code-injection true --source-map true --source-map-mode separate
 RUN cp -pf *.map ./src-maps/
 RUN find ./src-maps -type f -not -name "*.map" | xargs rm -f
@@ -30,7 +29,7 @@ RUN find . -type f -name *.map | xargs rm -f
 ##################
 # Production Image
 ##################
-FROM node:8-alpine AS production
+FROM node:latest AS production
 
 USER nobody
 
