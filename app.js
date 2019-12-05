@@ -1,4 +1,4 @@
-const appVersion = '1.01';
+const appVersion = '1.03';
 
 //////////////// environment variables ////////////////
 
@@ -64,7 +64,7 @@ const claimStore = require ('./claimStore.js');
 const issuer = 'http://simple-oidc-provider';  // Qlik only accepts this issuer
 const emptyhtml = require('./emptyhtml');
 var staticHTML = emptyhtml.page();
-
+Provider.proxy = true;
 process.claimStore = {};  // initialization of global variable
 
 let server;
@@ -117,6 +117,7 @@ let server;
 
 //////////////// hello world endpoint ////////////////
   app.get(process.env.PATH_PREFIX, function(req,res){
+    console.log('>>>Called endpoint /');
     res.status(200).send('Hello world. This is the Qlik Presales Single-Signon Passthru-OIDC.\n' 
     + `Version: ${appVersion}\n`);
   })
@@ -136,7 +137,7 @@ let server;
   });
 
 //////////////// signin endpoint ////////////////
-
+  
   if (process.env.SIGNIN_ENDPOINT_ENABLED == 'true') {
     app.all(process.env.PATH_PREFIX + '/signin', function(req, res) {
       var bodyStr = '';
@@ -149,6 +150,7 @@ let server;
         var forwardUrl;
         var jwtToken;
         if (req.method == 'POST' || req.method == 'GET') {
+          console.log('>>>Called endpoint /signin');
           // parse jwt and forward if it is found in the request body (typically a POST of a html form)
           bodyStr.split('&').forEach(i=>{
             if (i.split('=')[0] == 'jwt') { jwtToken = decodeURIComponent(i.split('=')[1]);}
@@ -198,7 +200,8 @@ let server;
 //////////////// env endpoint ////////////////
 
   app.get(process.env.PATH_PREFIX +'/env', function(req,res){
-    //console.log(process.env);
+    
+    console.log('>>>Called endpoint /env');
     var envs = JSON.parse(JSON.stringify(process.env)); // copy variable
     var res1;
     if (envs.JWT_DECRYPT_PUBLICKEY) { envs.JWT_DECRYPT_PUBLICKEY = '<i>***MASKED***</i>'}
