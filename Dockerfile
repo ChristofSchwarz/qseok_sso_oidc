@@ -1,7 +1,8 @@
 #########################
 # Base Image
 #########################
-FROM node:latest AS base
+#FROM node:latest AS base
+FROM node:alpine AS base
 
 WORKDIR /usr/src/app
 COPY . /usr/src/app
