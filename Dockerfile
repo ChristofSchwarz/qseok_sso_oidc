@@ -30,7 +30,8 @@ RUN find . -type f -name *.map | xargs rm -f
 ##################
 # Production Image
 ##################
-FROM node:latest AS production
+#FROM node:latest AS production
+FROM node:alpine AS production
 
 USER nobody
 
