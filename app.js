@@ -23,9 +23,9 @@ process.env.POST_LOGOUT_REDIRECTS = process.env.POST_LOGOUT_REDIRECTS
 
 
 // Convenience settings of /signin endpoint
-process.env.SIGNIN_ENDPOINT_ENABLED = process.env.SIGNIN_ENDPOINT_ENABLED 
+process.env.SIGNIN_ENDPOINT_ENABLED = process.env.SIGNIN_ENDPOINT_ENABLED
   || 'true'  // set to true if you like the /signin endpoint, otherwise it is missing
-process.env.FORWARD_URLS = process.env.FORWARD_URLS   
+process.env.FORWARD_URLS = process.env.FORWARD_URLS
   || '^http://|^https://'  // a regex to validate "forward" urls on /signin endpoint
 process.env.MSG_LOGIN = process.env.MSG_LOGIN 
   || 'Logging in...'  // title shown shortly when token was ok on /signin endpoint
