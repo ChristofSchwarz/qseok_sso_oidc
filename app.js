@@ -6,19 +6,19 @@ const appVersion = '1.04';
 require('dotenv').config();
 
 // OIDC Settings
-process.env.PORT = process.env.PORT                   
+process.env.PORT = process.env.PORT     
   || 3000  // http port where the service is exposed
-process.env.PATH_PREFIX = process.env.PATH_PREFIX     
+process.env.PATH_PREFIX = process.env.PATH_PREFIX
   || '/singlesignon'  // url prefix under which all services are running
-process.env.CLIENT_ID = process.env.CLIENT_ID         
+process.env.CLIENT_ID = process.env.CLIENT_ID
   || 'singlesignon'   // client_id of oidc provider, also configured in qliksense.yaml
-process.env.CLIENT_SECRET = process.env.CLIENT_SECRET 
+process.env.CLIENT_SECRET = process.env.CLIENT_SECRET
   || 'thanksjviandcsw'   // password for client, also configured in qliksense.yaml
-process.env.JWT_DECRYPT_PUBLICKEY = process.env.JWT_DECRYPT_PUBLICKEY 
+process.env.JWT_DECRYPT_PUBLICKEY = process.env.JWT_DECRYPT_PUBLICKEY
   || 'shhhh'  // passphrase or public certificate
 process.env.OIDC_REDIRECTS = process.env.OIDC_REDIRECTS
   || 'https://elastic.example/login/callback'  // comma-separated list of allowed callbacks to qliksense
-process.env.POST_LOGOUT_REDIRECTS = process.env.POST_LOGOUT_REDIRECTS 
+process.env.POST_LOGOUT_REDIRECTS = process.env.POST_LOGOUT_REDIRECTS
   || 'https://www.qlik.com'  // allowed urls to go to after logout
 
 
@@ -44,7 +44,7 @@ process.env.ERROR_MSG_NO_JWT = process.env.ERROR_MSG_NO_JWT
 process.env.ERROR_MSG_NO_FWD = process.env.ERROR_MSG_NO_FWD 
   || 'forward parameter missing.'  // msg by /signin endpoint when forward param was missing
 process.env.ERROR_MSG_BAD_FWD = process.env.ERROR_MSG_BAD_FWD 
-  || "forward querystring doesn't match the known FORWARD_URLS"  // msg by /signin endpoint when forward param was not allowed
+  || "forward querystring does not match the known FORWARD_URLS"  // msg by /signin endpoint when forward param was not allowed
 process.env.ERROR_REDIR_URL = process.env.ERROR_REDIR_URL 
   || ''  // possible full url to redirect back to a main page on error
 process.env.ERROR_DEDIR_AFTER_SECONDS = process.env.ERROR_DEDIR_AFTER_SECONDS 
