@@ -1,4 +1,4 @@
-const appVersion = '1.04';
+const appVersion = '1.05';
 
 //////////////// environment variables ////////////////
 
@@ -160,7 +160,7 @@ let server;
           
           jwtToken = (jwtToken || req.query.jwt || req.headers.authorization || '').replace('Bearer ','').replace('bearer ','');
           forwardUrl = forwardUrl || req.query.forward;
-
+console.log('forwardUrl', forwardUrl);
           res.cookie('_session', '', { maxAge: 0});  // delete previous _state.foo and _session cookie
           //res.cookie('_state.'+config.client_config[0].client_id, '', { maxAge: 0});
 
@@ -171,7 +171,7 @@ let server;
           } else if (jwtToken == '') {
             res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_NO_JWT
               ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS));    
-          } else if (forwardUrl == '') {
+          } else if (forwardUrl == '' || forwardUrl == undefined) {
             res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_NO_FWD
               ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS));    
           } else if ((forwardUrl).match(new RegExp(process.env.FORWARD_URLS)) == null) {
@@ -225,7 +225,7 @@ let server;
   
 
   server = app.listen(process.env.PORT, () => {
-    console.log(`application listening on port ${process.env.PORT}, check its ${process.env.PATH_PREFIX}/.well-known/openid-configuration`);
+    console.log(`application listening on port ${process.env.PORT}, check its ${process.env.PATH_PREFIX}/.well-known/openid-configuration`);    
   });
 
 })().catch((err) => {

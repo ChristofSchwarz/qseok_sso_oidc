@@ -27,15 +27,38 @@ function cleanupGuidsArray() {
 
 ////////////////////////////////// createticket //////////////////////////////////
 
+// http://qse-csw.westeurope.cloudapp.azure.com:3000/singlesignon/signin?forward=https://elastic.example&jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imp1YiIsIm5hbWUiOiJKdWxpYSBCYXVtZ2FydG5lciIsImdyb3VwcyI6WyJFdmVyeW9uZSIsIlByZXNhbGVzIl0sImlhdCI6MTY3MzgwNTc4Mn0.Pc1yWkStxMEt3_7EtmhEx0oWGA8FN_sOjjdECTRz3HA
+// http://qse-csw.westeurope.cloudapp.azure.com:3000/singlesignon/signin?forward=https://elastic.example&jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjY0Mzc2NDIyLTEzODctNDUzNy1iY2JjLThmYTk4MGIzMzI3MSJ9.eyJhY2NvdW50Ijp7Il9pZCI6IjVlZDhmMTZjN2QzMzY1MDAxOWFkYTZhNSIsIlhVU0VSIjoiQVBBbmFseXRpY3MiLCJUWVBFIjoiIiwiRk5BTUUiOiJBUCIsIkxOQU1FIjoiQW5hbHl0aWNzIiwiREVQVCI6IiIsIlBIT05FIjoiIiwiTUdSVVNFUklEIjoiIiwiRU1BSUwiOiJhcGFuYWx5dGljc0BzZXJyYWxhLmNvbSIsIkxBTkciOiIiLCJBUFJMVkwiOiIiLCJDT0RFUklEIjoiIiwiQlVLUlMiOiIiLCJXQUVSUyI6IiIsIktPU1RMIjoiIiwiTElGTlIiOiIiLCJBU1NJR05NRU5UUyI6W3siVFlQRSI6IkFVVEgiLCJWQUxVRSI6WyJBUF9NQU5BR0VSIiwiQlVTX0FOTFkiXX1dLCJVU0VSX1RZUEUiOiJyZWd1bGFyIiwiT0JKRUNUIjoiVVNFUiIsIkFSQ0hJVkVLRVkiOiJVU0VSIiwiT0ZGU0VUIjoiYzNmOWE1ZTEtMjE2Mi00ZTY4LWJkNDQtMDM3NWM5Y2MxNmQyIiwiVEVOQU5UX0lEIjoidGVzdC10ZW5hbnQifSwiaWF0IjoxNTkyODQwNjA5LCJleHAiOjE1OTkxNDA2MDl9.vkADe0H7glVCNQkrxcSWmnQaxR13gqLlQFQeIf2CCxc
 exports.createTicket = function(token) { 
     if (debugLog) console.log(`>>> Called claimStore.js, function .createticket('${token.substr(0,5)}...${token.substr(-5)}')`);
     var newGuid = createUUID();
     try {
         decoded = jsonwebtoken.verify (token, decryptKey);
+        var userIdKey 
+        var fixedtoken
+        //userIdKey = decoded.id;
+        //fixedtoken = token;
+        
+        // optional reformatting of decoded JWT ... requested by serrala.com
+        
+        jwt_header = token.split('.')[0];
+        var buff = Buffer.from(JSON.stringify({
+            id: decoded.account.XUSER,
+            email: decoded.account.EMAIL,
+            name: (decoded.account.FNAME + ' ' + decoded.account.LNAME).trim(),
+            iat: decoded.iat,
+            exp: decoded.exp
+        }), 'utf8');
+        userIdKey = decoded.account.XUSER;
+        var jwt_payload = buff.toString('base64');
+        fixedtoken = jwt_header + '.' + jwt_payload + '.';
+    
+
         // make 2 entries in claimStore, one with ticket-number as key, one with user id as key
-        process.claimStore[decoded.id] = { jwt: token, time: Date.now()}
-        process.claimStore[newGuid] = { jwt: token, time: Date.now()};
+        process.claimStore[userIdKey] = { jwt: fixedtoken, time: Date.now()}
+        process.claimStore[newGuid] = { jwt: fixedtoken, time: Date.now()};
         cleanupGuidsArray();
+        if (debugLog) console.log('claimStore is now: ', process.claimStore);
         if (debugLog) console.log(`New ticket id ${newGuid}`);
         return newGuid;
     } catch(err) {     
@@ -67,6 +90,8 @@ exports.associateSession = function(qlikticket, session) {
 }
 
 ////////////////////////////////// whois //////////////////////////////////
+
+// this is the endpoint which returns the saved user information from the claimStore array
 
 exports.whois = function(searchkey) {
     if (debugLog) console.log(`>>> Called claimStore.js, function .whois('${searchkey}')`);
