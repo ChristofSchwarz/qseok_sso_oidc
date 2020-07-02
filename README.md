@@ -1,7 +1,7 @@
 # OIDC provider for QSEoK with SSO
 by Jacob Vinzent and Christof Schwarz
 
-*Excurse: How to update and republish to Docker Hub?*
+*Excurse: <a href="docker.md">How to (re)publish this git to Docker Hub</a>?*
 
 This is a oidc provider based on this project (https://github.com/panva/node-oidc-provider) with a new behaviour. It does not prompt for userid and password, it looks up the user from a ticketnumber which was acquired before initiating the login process at qliksense.
 
