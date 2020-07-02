@@ -1,6 +1,8 @@
 # OIDC provider for QSEoK with SSO
 by Jacob Vinzent and Christof Schwarz
 
+*Excurse: <a href="docker.md">How to (re)publish this git to Docker Hub</a>?*
+
 This is a oidc provider based on this project (https://github.com/panva/node-oidc-provider) with a new behaviour. It does not prompt for userid and password, it looks up the user from a ticketnumber which was acquired before initiating the login process at qliksense.
 
 The trick is to make a **POST** call to the endpoint **/ticket** with a valid JWT token in the Authentication header (Bearer XXXXXX). The result is a JSON with the Ticket in this format, if the JWT was valid and the signature could be verified:
