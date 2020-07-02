@@ -105,10 +105,13 @@ let server;
       // The set-cookie information from the response header contains the session id issued by this oidc
       var _session = '';
       var _interaction = '';
-      cookies.forEach(setcookie => {
-        if (setcookie.substr(0,9) == '_session=') { _session = setcookie.substr(9).split(';')[0]; }
-        if (setcookie.substr(0,13) == '_interaction=') { _interaction = setcookie.substr(13).split(';')[0]; }
-      })
+      console.log('cookies', cookies);
+      if (cookies) {
+        cookies.forEach(setcookie => {
+          if (setcookie.substr(0,9) == '_session=') { _session = setcookie.substr(9).split(';')[0]; }
+          if (setcookie.substr(0,13) == '_interaction=') { _interaction = setcookie.substr(13).split(';')[0]; }
+        })
+      }
       console.log('_session=' + _session);
       console.log('_interaction=' + _interaction);
       if (_session.length > 0) claimStore.associateSession(qlikticket, _session);
@@ -160,7 +163,7 @@ let server;
           
           jwtToken = (jwtToken || req.query.jwt || req.headers.authorization || '').replace('Bearer ','').replace('bearer ','');
           forwardUrl = forwardUrl || req.query.forward;
-console.log('forwardUrl', forwardUrl);
+
           res.cookie('_session', '', { maxAge: 0});  // delete previous _state.foo and _session cookie
           //res.cookie('_state.'+config.client_config[0].client_id, '', { maxAge: 0});
 

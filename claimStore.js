@@ -1,6 +1,11 @@
-const debugLog = process.env.DEBUG_LOGGING || 1;
+const debugLog = process.env.DEBUG_LOGGING || false;
 const jsonwebtoken = require('jsonwebtoken');
 const decryptKey = process.env.JWT_DECRYPT_PUBLICKEY ||'shhhh';
+const useJwtWithoutValidation = (process.env.USE_JWT_WITHOUT_VALIDATION ? 
+    process.env.USE_JWT_WITHOUT_VALIDATION == 'true' || process.env.USE_JWT_WITHOUT_VALIDATION == true
+    || process.env.USE_JWT_WITHOUT_VALIDATION == '1' || process.env.USE_JWT_WITHOUT_VALIDATION == 1 
+    : false); 
+
 
 // Functions here work with the global variable processclaimStore
 
@@ -20,38 +25,49 @@ function cleanupGuidsArray() {
         if (diff > 1) delete process.claimStore[key];
     }   
 
-    // if (debugLog) console.log('³³³³³³³³³³³³³³³³³³³³³³³³³³³³³ FYI: claimStore ³³³³³³³³³³³³³³');
-    // if (debugLog) console.log(process.claimStore);
-    // if (debugLog) console.log('³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³');
+    if (debugLog) console.log('============ FYI: claimStore is now ============');
+    if (debugLog) console.log(process.claimStore);
+    if (debugLog) console.log('================================================');
 }
 
 ////////////////////////////////// createticket //////////////////////////////////
 
+// this endpoint checks the token with the decryptKey (public key or passphrase) 
+// and 
 // http://qse-csw.westeurope.cloudapp.azure.com:3000/singlesignon/signin?forward=https://elastic.example&jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imp1YiIsIm5hbWUiOiJKdWxpYSBCYXVtZ2FydG5lciIsImdyb3VwcyI6WyJFdmVyeW9uZSIsIlByZXNhbGVzIl0sImlhdCI6MTY3MzgwNTc4Mn0.Pc1yWkStxMEt3_7EtmhEx0oWGA8FN_sOjjdECTRz3HA
-// http://qse-csw.westeurope.cloudapp.azure.com:3000/singlesignon/signin?forward=https://elastic.example&jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjY0Mzc2NDIyLTEzODctNDUzNy1iY2JjLThmYTk4MGIzMzI3MSJ9.eyJhY2NvdW50Ijp7Il9pZCI6IjVlZDhmMTZjN2QzMzY1MDAxOWFkYTZhNSIsIlhVU0VSIjoiQVBBbmFseXRpY3MiLCJUWVBFIjoiIiwiRk5BTUUiOiJBUCIsIkxOQU1FIjoiQW5hbHl0aWNzIiwiREVQVCI6IiIsIlBIT05FIjoiIiwiTUdSVVNFUklEIjoiIiwiRU1BSUwiOiJhcGFuYWx5dGljc0BzZXJyYWxhLmNvbSIsIkxBTkciOiIiLCJBUFJMVkwiOiIiLCJDT0RFUklEIjoiIiwiQlVLUlMiOiIiLCJXQUVSUyI6IiIsIktPU1RMIjoiIiwiTElGTlIiOiIiLCJBU1NJR05NRU5UUyI6W3siVFlQRSI6IkFVVEgiLCJWQUxVRSI6WyJBUF9NQU5BR0VSIiwiQlVTX0FOTFkiXX1dLCJVU0VSX1RZUEUiOiJyZWd1bGFyIiwiT0JKRUNUIjoiVVNFUiIsIkFSQ0hJVkVLRVkiOiJVU0VSIiwiT0ZGU0VUIjoiYzNmOWE1ZTEtMjE2Mi00ZTY4LWJkNDQtMDM3NWM5Y2MxNmQyIiwiVEVOQU5UX0lEIjoidGVzdC10ZW5hbnQifSwiaWF0IjoxNTkyODQwNjA5LCJleHAiOjE1OTkxNDA2MDl9.vkADe0H7glVCNQkrxcSWmnQaxR13gqLlQFQeIf2CCxc
+// http://qse-csw.westeurope.cloudapp.azure.com:3000/singlesignon/signin?forward=https://qliksense2.serrala.cloud&jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjY0Mzc2NDIyLTEzODctNDUzNy1iY2JjLThmYTk4MGIzMzI3MSJ9.eyJhY2NvdW50Ijp7Il9pZCI6IjVlZDhmMTZjN2QzMzY1MDAxOWFkYTZhNSIsIlhVU0VSIjoiQVBBbmFseXRpY3MiLCJUWVBFIjoiIiwiRk5BTUUiOiJBUCIsIkxOQU1FIjoiQW5hbHl0aWNzIiwiREVQVCI6IiIsIlBIT05FIjoiIiwiTUdSVVNFUklEIjoiIiwiRU1BSUwiOiJhcGFuYWx5dGljc0BzZXJyYWxhLmNvbSIsIkxBTkciOiIiLCJBUFJMVkwiOiIiLCJDT0RFUklEIjoiIiwiQlVLUlMiOiIiLCJXQUVSUyI6IiIsIktPU1RMIjoiIiwiTElGTlIiOiIiLCJBU1NJR05NRU5UUyI6W3siVFlQRSI6IkFVVEgiLCJWQUxVRSI6WyJBUF9NQU5BR0VSIiwiQlVTX0FOTFkiXX1dLCJVU0VSX1RZUEUiOiJyZWd1bGFyIiwiT0JKRUNUIjoiVVNFUiIsIkFSQ0hJVkVLRVkiOiJVU0VSIiwiT0ZGU0VUIjoiYzNmOWE1ZTEtMjE2Mi00ZTY4LWJkNDQtMDM3NWM5Y2MxNmQyIiwiVEVOQU5UX0lEIjoidGVzdC10ZW5hbnQifSwiaWF0IjoxNTkyODQwNjA5LCJleHAiOjE1OTkxNDA2MDl9.vkADe0H7glVCNQkrxcSWmnQaxR13gqLlQFQeIf2CCxc
+
 exports.createTicket = function(token) { 
     if (debugLog) console.log(`>>> Called claimStore.js, function .createticket('${token.substr(0,5)}...${token.substr(-5)}')`);
     var newGuid = createUUID();
     try {
-        decoded = jsonwebtoken.verify (token, decryptKey);
-        var userIdKey 
+        var decoded;
+        if (useJwtWithoutValidation) {
+            console.log('Because of setting USE_JWT_WITHOUT_VALIDATION the JWT token is used without validation! Dont use in production');
+            decoded = jsonwebtoken.decode (token);
+        } else {
+            decoded = jsonwebtoken.verify (token, decryptKey);
+        }
+        var userIdKey;
         var fixedtoken
-        //userIdKey = decoded.id;
-        //fixedtoken = token;
+        userIdKey = decoded.id;
+        fixedtoken = token;
         
-        // optional reformatting of decoded JWT ... requested by serrala.com
-        
-        jwt_header = token.split('.')[0];
-        var buff = Buffer.from(JSON.stringify({
-            id: decoded.account.XUSER,
-            email: decoded.account.EMAIL,
-            name: (decoded.account.FNAME + ' ' + decoded.account.LNAME).trim(),
-            iat: decoded.iat,
-            exp: decoded.exp
-        }), 'utf8');
-        userIdKey = decoded.account.XUSER;
-        var jwt_payload = buff.toString('base64');
-        fixedtoken = jwt_header + '.' + jwt_payload + '.';
+/*special*/ // optional reformatting of decoded JWT ... requested by serrala.com
+/*special*/ // this restructures the JWT and saves the modified one into claimStore array        
+/*special*/ jwt_header = token.split('.')[0];
+/*special*/ var buff = Buffer.from(JSON.stringify({
+/*special*/   id: decoded.account.XUSER,
+/*special*/   email: decoded.account.EMAIL,
+/*special*/   name: (decoded.account.FNAME + ' ' + decoded.account.LNAME).trim(),
+/*special*/   iat: decoded.iat,
+/*special*/   exp: decoded.exp
+/*special*/ }), 'utf8');
+/*special*/ userIdKey = decoded.account.XUSER;
+/*special*/ var jwt_payload = buff.toString('base64');
+/*special*/ // get rid of possible "=" at the end of the base64 code
+/*special*/ jwt_payload = jwt_payload.split('=')[0];
+/*special*/ fixedtoken = jwt_header + '.' + jwt_payload + '.';
     
 
         // make 2 entries in claimStore, one with ticket-number as key, one with user id as key
@@ -70,6 +86,10 @@ exports.createTicket = function(token) {
 };
 
 ////////////////////////////////// associateSession //////////////////////////////////
+
+// This function manages the process.claimStore array in a way, that a JWT can be 
+// found under different criterias: under the ticketnumber, the userid, and a session
+// id given by this OIDC
 
 exports.associateSession = function(qlikticket, session) {
     if (debugLog) console.log(`>>> Called claimStore.js, function .associateSession('${qlikticket}', '${session}')`);
@@ -96,10 +116,14 @@ exports.associateSession = function(qlikticket, session) {
 exports.whois = function(searchkey) {
     if (debugLog) console.log(`>>> Called claimStore.js, function .whois('${searchkey}')`);
     cleanupGuidsArray();
+
     var entry = process.claimStore[searchkey];
+    
     if (entry) {
-        return jsonwebtoken.decode(entry.jwt);
+        var decodedJwt = jsonwebtoken.decode(entry.jwt);
+        return decodedJwt;
     } else {
+        if (debugLog) console.log(`>>> Entry "${searchkey}" was not found in claimStore`);
         return null;
     }
 }
