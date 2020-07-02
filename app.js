@@ -1,4 +1,4 @@
-const appVersion = '1.05';
+// When making updates, increase the VERSION number in file "VERSION" !
 
 //////////////// environment variables ////////////////
 
@@ -48,13 +48,15 @@ process.env.ERROR_MSG_BAD_FWD = process.env.ERROR_MSG_BAD_FWD
 process.env.ERROR_REDIR_URL = process.env.ERROR_REDIR_URL 
   || ''  // possible full url to redirect back to a main page on error
 process.env.ERROR_DEDIR_AFTER_SECONDS = process.env.ERROR_DEDIR_AFTER_SECONDS 
-  || '0'  // delay for how long an error msg is shown before redirecting back to main page
+  || '2'  // delay for how long an error msg is shown before redirecting back to main page
 
 
 //////////////// required modules ////////////////
 
 const Provider = require('oidc-provider').Provider;
 const express = require('express');
+const fs = require('fs'); // only needed to read version from file
+const appVersion = fs.readFileSync('VERSION');
 var app = express();
 const configuration = require('./helpers/config');
 const routes = require('./routes/express');
@@ -228,7 +230,10 @@ let server;
   
 
   server = app.listen(process.env.PORT, () => {
-    console.log(`application listening on port ${process.env.PORT}, check its ${process.env.PATH_PREFIX}/.well-known/openid-configuration`);    
+    console.log('Here are all settings taken from environment variables:')
+    console.log(process.env);    
+    console.log(`App version ${appVersion} listening on port ${process.env.PORT} ...`);
+    console.log(`Browse to ${process.env.PATH_PREFIX}/.well-known/openid-configuration for OIDC requests ...`);        
   });
 
 })().catch((err) => {
