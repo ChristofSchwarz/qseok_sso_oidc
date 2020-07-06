@@ -8,4 +8,8 @@ sudo docker build https://github.com/ChristofSchwarz/qseok_sso_oidc.git -t qrist
 sudo docker images qristof/sso4serrala:latest -q
 sudo docker push qristof/sso4serrala:latest 
 ```
+To run the new image from Docker Hub:
+```
+sudo docker run -p 3000:3000 qristof/sso4serrala
+```
 
