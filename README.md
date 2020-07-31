@@ -1,6 +1,8 @@
 # OIDC provider for QSEoK with SSO
 by Jacob Vinzent and Christof Schwarz
 
+*Note: With the help of <a href=".github/workflows/main.yml">Github Action</a> this repository is also published/updated on docker hub, image qristof/qseoksso
+
 *Excurse: <a href="docker.md">How to (re)publish this git to Docker Hub</a>?*
 
 This is a oidc provider based on this project (https://github.com/panva/node-oidc-provider) with a new behaviour. It does not prompt for userid and password, it looks up the user from a ticketnumber which was acquired before initiating the login process at qliksense.
