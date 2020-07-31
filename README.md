@@ -24,7 +24,7 @@ The payload of the token is what is going to be injected to qliksense at the end
 ```
 {
   "id": "jub",
-  "name": "Julia Baumgartner",
+  "name": "Julia Baumgart",
   "groups": [
     "Everyone",
     "Presales"
