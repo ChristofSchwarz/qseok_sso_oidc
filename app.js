@@ -142,7 +142,7 @@ let server;
     }
   });
 
-//////////////// signin endpoint ////////////////
+  //////////////// signin endpoint ////////////////
   
   if (process.env.SIGNIN_ENDPOINT_ENABLED == 'true') {
     app.all(process.env.PATH_PREFIX + '/signin', function(req, res) {
@@ -199,6 +199,76 @@ let server;
         } else {
           res.status(404).send(`404 - Method ${req.method} not allowed here.`);
         }
+      });
+    });
+  }
+
+//////////////// Special Serrala Signin endpoint ////////////////
+  
+  if (process.env.SIGNIN_ENDPOINT_ENABLED == 'true') {
+    app.all(process.env.PATH_PREFIX + '/serrala-signin', function(req, res) {
+      var bodyStr = '';
+      req.on("data",function(chunk){
+          bodyStr += chunk.toString();
+      });
+      req.on("end",function(){
+
+        // Try to get the parameters "forward" and the jwt token in different ways
+        var forwardUrl = req.query.forward || '';
+        var jwtToken = req.query.jwt || '';
+
+          console.log('>>>Called endpoint /serrala-signin');
+          // parse jwt and forward if it is found in the request body (typically a POST of a html form)
+          
+          res.cookie('_session', '', { maxAge: 0});  // delete previous _state.foo and _session cookie
+          //res.cookie('_state.'+config.client_config[0].client_id, '', { maxAge: 0});
+
+          // check for possible errors in the parameters "forward" and jwt token
+          if (jwtToken == '' && forwardUrl == '') { 
+            res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_NO_PARAMS
+              ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS));      
+          } else if (jwtToken == '') {
+            res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_NO_JWT
+              ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS));    
+          } else if (forwardUrl == '' || forwardUrl == undefined) {
+            res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_NO_FWD
+              ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS));    
+          } else if ((forwardUrl).match(new RegExp(process.env.FORWARD_URLS)) == null) {
+            res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_BAD_FWD
+              ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS));    
+          } else {
+/* 
+special case for Serrala: the payload will be restructrued, only those keys are being set:
+id, email, name, iat, exp
+... while in the original jwt the structure is much longer and in a sub-array "account"
+*/
+            decoded = jsonwebtoken.decode (jwtToken);
+            jwt_header = jwtToken.split('.')[0];
+            var buff = Buffer.from(JSON.stringify({
+              id: decoded.account.XUSER,
+              email: decoded.account.EMAIL,
+              name: (decoded.account.FNAME + ' ' + decoded.account.LNAME).trim(),
+              iat: decoded.iat,
+              exp: decoded.exp
+            }), 'utf8');
+            userIdKey = decoded.account.XUSER;
+            var jwt_payload = buff.toString('base64');
+            // get rid of possible "=" at the end of the base64 code
+            jwt_payload = jwt_payload.split('=')[0];
+            var jwtTokenNew = jwt_header + '.' + jwt_payload + '.'; // compose the new JWT without signature
+            console.log('converted JWT is ' + jwtTokenNew);
+            var guid = claimStore.createTicket(jwtTokenNew);
+            if (guid.match(new RegExp('^{.*\}$')) != null) {
+              // a json object was returned '{ ... }', that means an error was caught, the jwt was invalid
+              res.status(401).send(emptyhtml.error(process.env.ERROR_TITLE, process.env.ERROR_MSG_BAD_TOKEN
+                ,process.env.ERROR_REDIR_URL, process.env.ERROR_DEDIR_AFTER_SECONDS)); 
+            } else {
+              // all good, jwt accepted, forward the user to the desired forwardUrl
+              forwardUrl = forwardUrl + ((forwardUrl.indexOf('?')>=0)?'&':'?') + 'qlikticket=' + guid;
+              res.status(200).send(emptyhtml.message(process.env.MSG_LOGIN, process.env.MSG_TOKEN_ACCEPTED
+                , true, forwardUrl));
+            }          
+          }
       });
     });
   }
